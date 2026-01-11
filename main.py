@@ -6,15 +6,19 @@ app = FastAPI()
 
 @app.get("/")
 def home():
-    return {"message": "Server is Live"}
+    return {"status": "Server is Live"}
 
 @app.get("/process")
-def process(video_url: str):
+def process_video(video_url: str):
     try:
-        ydl_opts = {'format': 'best'}
+        # Link ko theek karna
+        if video_url.startswith('//'):
+            video_url = 'https:' + video_url
+            
+        ydl_opts = {'format': 'best', 'quiet': True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
-            video_link = info.get('url')
-        return RedirectResponse(url=video_link)
+            download_url = info.get('url')
+        return RedirectResponse(url=download_url)
     except Exception as e:
         return {"error": str(e)}
